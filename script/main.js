@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		modalBlock = document.querySelector('#modalBlock'),
 		modalWrap = document.querySelector('.modal'),
 		closeModal = document.querySelector('#closeModal'),
+		modalTitle = document.querySelector('.modal-title'),
 		questionTitle = document.querySelector('#question'),
 		formAnswers = document.querySelector('#formAnswers'),
 		burgerBtn = document.getElementById('burger'),
@@ -13,82 +14,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	let clientWidth;
 
+	// функция получения данных извне
+	const getData = () => {
+		formAnswers.textContent = 'Load';
 
-	const questions = [
-	    {
-	        question: "Какого цвета бургер?",
-	        answers: [
-	            {
-	                title: 'Стандарт',
-	                url: './image/burger.png'
-	            },
-	            {
-	                title: 'Черный',
-	                url: './image/burgerBlack.png'
-	            }
-	        ],
-	        type: 'radio'
-	    },
-	    {
-	        question: "Из какого мяса котлета?",
-	        answers: [
-	            {
-	                title: 'Курица',
-	                url: './image/chickenMeat.png'
-	            },
-	            {
-	                title: 'Говядина',
-	                url: './image/beefMeat.png'
-	            },
-	            {
-	                title: 'Свинина',
-	                url: './image/porkMeat.png'
-	            }
-	        ],
-	        type: 'radio'
-	    },
-	    {
-	        question: "Дополнительные ингредиенты?",
-	        answers: [
-	            {
-	                title: 'Помидор',
-	                url: './image/tomato.png'
-	            },
-	            {
-	                title: 'Огурец',
-	                url: './image/cucumber.png'
-	            },
-	            {
-	                title: 'Салат',
-	                url: './image/salad.png'
-	            },
-	            {
-	                title: 'Лук',
-	                url: './image/onion.png'
-	            }
-	        ],
-	        type: 'checkbox'
-	    },
-	    {
-	        question: "Добавить соус?",
-	        answers: [
-	            {
-	                title: 'Чесночный',
-	                url: './image/sauce1.png'
-	            },
-	            {
-	                title: 'Томатный',
-	                url: './image/sauce2.png'
-	            },
-	            {
-	                title: 'Горчичный',
-	                url: './image/sauce3.png'
-	            }
-	        ],
-	        type: 'radio'
-	    }
-	];
+		setTimeout( () => {
+			fetch('./questions1.json')
+			.then(res => res.json())
+			.then(obj => playTest(obj.questions))
+			.catch(err => {
+				formAnswers.textContent = 'Ошибка загрузки данных!';
+				console.error(err);
+			})
+		}, 1000);
+		
+	}
 
+	
+	// появления и исчезновения меню справа в зависимости от ширины экрана пользователя
 	const resizeWindow = () => {
 		clientWidth = document.documentElement.clientWidth;
 
@@ -102,9 +45,14 @@ document.addEventListener('DOMContentLoaded', function () {
 	resizeWindow();
 
 
-	const playTest = () => {
+	// функция запуска тестирования
+	const playTest = (questions) => {
+
 		const finalAnswers = [];
+		const obj = {};
 		let numberQuestion = 0;
+
+		modalTitle.textContent = 'Ответь на вопрос';
 
 		const renderAnswers = (index) => {
 			questions[index].answers.forEach((answer) => {
@@ -142,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
 					break;
 
 				case numberQuestion === questions.length:
+					questionTitle.textContent = '';
+					modalTitle.textContent = '';
 					nextButton.classList.add('d-none');
 					prevButton.classList.add('d-none');
 					sendButton.classList.remove('d-none');
@@ -152,11 +102,28 @@ document.addEventListener('DOMContentLoaded', function () {
 						<input type="phone" class="form-control" id="numberPhone" />
 					</div>
 					`;
+
+					const numberPhone = document.getElementById('numberPhone');
+					numberPhone.addEventListener('input', (event) => {
+						event.target.value = event.target.value.replace(/^0-9+-/, '');
+					});
+
 					break;
 
 				case numberQuestion === questions.length + 1:
-					formAnswers.textContent = 'Спасибо за пройденный тест! С вами скоро свяжется наш менеджер.';
+					formAnswers.innerHTML = `
+					<p>Спасибо за пройденный тест!</p> 
+					<p>С вами скоро свяжется наш менеджер.</p>
+					`;
 					sendButton.classList.add('d-none');
+
+					for(let key in obj) {
+						let newObj = {};
+						newObj[key] = obj[key];
+						finalAnswers.push(newObj);
+						console.log(1111);
+					}
+
 					setTimeout(() => {
 						modalBlock.classList.remove('d-block');
 						burgerBtn.classList.remove('active');
@@ -169,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		renderQuestions(numberQuestion);
 
 		const checkAnswer = () => {
-			const obj = {};
 
 			const inputs = [...formAnswers.elements].filter((input) => input.checked || input.id === 'numberPhone');
 
@@ -182,8 +148,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					obj['Номер телефона'] = input.value;
 				}
 			});
-
-			finalAnswers.push(obj);
 
 		}
 	
@@ -207,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	};
 
 
-
+	// анимация для плавного появления модального окна
 	let count = -100;
 	modalDialog.style.top = count + '%';
 
@@ -229,13 +193,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		requestAnimationFrame(animateModal);
 		burgerBtn.classList.add('active');
 		modalBlock.classList.add('d-block');
-		playTest();
+		getData();
 	});
 
 	btnOpenModal.addEventListener('click', () => {
 		requestAnimationFrame(animateModal);
 		modalBlock.classList.add('d-block');
-		playTest();
+		getData();
 	});
 
 	closeModal.addEventListener('click', () => {
