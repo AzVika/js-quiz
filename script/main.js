@@ -14,19 +14,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	let clientWidth;
 
+	// Your web app's Firebase configuration
+	const firebaseConfig = {
+		apiKey: "AIzaSyAQkLA2FJ-Q51gFvtO1UsPRFnIz5QdD8YE",
+		authDomain: "js-quiz-3f261.firebaseapp.com",
+		databaseURL: "https://js-quiz-3f261.firebaseio.com",
+		projectId: "js-quiz-3f261",
+		storageBucket: "js-quiz-3f261.appspot.com",
+		messagingSenderId: "910808131799",
+		appId: "1:910808131799:web:e15a2c4a5458f80236e892",
+		measurementId: "G-JSKB9CSDEY"
+	};
+	// Initialize Firebase
+	firebase.initializeApp(firebaseConfig);
+	firebase.analytics();
+
+	
 	// функция получения данных извне
 	const getData = () => {
 		formAnswers.textContent = 'Load';
 
+		nextButton.classList.add('d-none');
+		prevButton.classList.add('d-none');
+
 		setTimeout( () => {
-			fetch('./questions1.json')
-			.then(res => res.json())
-			.then(obj => playTest(obj.questions))
-			.catch(err => {
-				formAnswers.textContent = 'Ошибка загрузки данных!';
-				console.error(err);
-			})
-		}, 1000);
+			firebase.database().ref().child('questions').once('value')
+				.then(snap => playTest(snap.val()));
+		}, 500);
 		
 	}
 
