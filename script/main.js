@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		formAnswers.textContent = 'Load';
 
 		setTimeout( () => {
-			fetch('./questions1.json')
+			fetch('./questions.json')
 			.then(res => res.json())
 			.then(obj => playTest(obj.questions))
 			.catch(err => {
